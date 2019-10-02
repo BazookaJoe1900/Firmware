@@ -54,6 +54,13 @@
 #include <systemlib/mavlink_log.h>
 #include <math.h>
 
+#ifdef __PX4_DARWIN
+#include <sys/param.h>
+#include <sys/mount.h>
+#else
+#include <sys/statfs.h>
+#endif
+
 #include <uORB/topics/actuator_armed.h>
 #include <uORB/topics/actuator_controls.h>
 #include <uORB/topics/actuator_outputs.h>
@@ -5047,6 +5054,87 @@ protected:
 	}
 };
 
+
+class MavlinkStreamStorageInformation : public MavlinkStream
+{
+public:
+	const char *get_name() const
+	{
+		return MavlinkStreamStorageInformation::get_name_static();
+	}
+
+	static const char *get_name_static()
+	{
+		return "STORAGE_INFORMATION";
+	}
+
+	static uint16_t get_id_static()
+	{
+		return MAVLINK_MSG_ID_STORAGE_INFORMATION;
+	}
+
+	uint16_t get_id()
+	{
+		return get_id_static();
+	}
+
+	static MavlinkStream *new_instance(Mavlink *mavlink)
+	{
+		return new MavlinkStreamStorageInformation(mavlink);
+	}
+
+	unsigned get_size()
+	{
+		return MAVLINK_MSG_ID_STORAGE_INFORMATION_LEN + MAVLINK_NUM_NON_PAYLOAD_BYTES;
+	}
+
+private:
+	/* do not allow top copying this class */
+	MavlinkStreamStorageInformation(MavlinkStreamStorageInformation &) = delete;
+	MavlinkStreamStorageInformation &operator = (const MavlinkStreamStorageInformation &) = delete;
+
+protected:
+	explicit MavlinkStreamStorageInformation(Mavlink *mavlink) : MavlinkStream(mavlink)
+	{}
+
+	bool send(const hrt_abstime t)
+	{
+		mavlink_storage_information_t storage_info{};
+		const char *microsd_dir = PX4_STORAGEDIR;
+
+		struct statfs statfs_buf = {};
+		uint64_t total_bytes = 0;
+		uint64_t avail_bytes = 0;
+
+		printf("send MavlinkStreamStorageInformation\n");
+
+		if (statfs(microsd_dir, &statfs_buf) == 0) {
+			total_bytes = (uint64_t)statfs_buf.f_blocks * statfs_buf.f_bsize;
+			avail_bytes = (uint64_t)statfs_buf.f_bavail * statfs_buf.f_bsize;
+
+		} else {
+			total_bytes = 0;
+			avail_bytes = 0;
+		}
+
+
+		if (total_bytes == 0) { // on NuttX we get 0 total bytes if no SD card is inserted
+			storage_info.status = 0; // not available
+
+		} else {
+			storage_info.status = 2; // available & formatted
+
+			storage_info.total_capacity = total_bytes / 1024. / 1024.;
+			storage_info.available_capacity = avail_bytes / 1024. / 1024.;
+		}
+
+		storage_info.time_boot_ms = hrt_absolute_time() / 1000;
+		mavlink_msg_storage_information_send_struct(_mavlink->get_channel(), &storage_info);
+
+		return true;
+	}
+};
+
 static const StreamListItem streams_list[] = {
 	StreamListItem(&MavlinkStreamHeartbeat::new_instance, &MavlinkStreamHeartbeat::get_name_static, &MavlinkStreamHeartbeat::get_id_static),
 	StreamListItem(&MavlinkStreamStatustext::new_instance, &MavlinkStreamStatustext::get_name_static, &MavlinkStreamStatustext::get_id_static),
@@ -5106,7 +5194,8 @@ static const StreamListItem streams_list[] = {
 	StreamListItem(&MavlinkStreamGroundTruth::new_instance, &MavlinkStreamGroundTruth::get_name_static, &MavlinkStreamGroundTruth::get_id_static),
 	StreamListItem(&MavlinkStreamPing::new_instance, &MavlinkStreamPing::get_name_static, &MavlinkStreamPing::get_id_static),
 	StreamListItem(&MavlinkStreamOrbitStatus::new_instance, &MavlinkStreamOrbitStatus::get_name_static, &MavlinkStreamOrbitStatus::get_id_static),
-	StreamListItem(&MavlinkStreamObstacleDistance::new_instance, &MavlinkStreamObstacleDistance::get_name_static, &MavlinkStreamObstacleDistance::get_id_static)
+	StreamListItem(&MavlinkStreamObstacleDistance::new_instance, &MavlinkStreamObstacleDistance::get_name_static, &MavlinkStreamObstacleDistance::get_id_static),
+	StreamListItem(&MavlinkStreamStorageInformation::new_instance, &MavlinkStreamStorageInformation::get_name_static, &MavlinkStreamStorageInformation::get_id_static),
 };
 
 const char *get_stream_name(const uint16_t msg_id)
