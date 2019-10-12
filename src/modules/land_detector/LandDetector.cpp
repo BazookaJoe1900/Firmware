@@ -149,6 +149,10 @@ void LandDetector::_cycle()
 		_landDetected.freefall = freefallDetected;
 		_landDetected.maybe_landed = maybe_landedDetected;
 		_landDetected.ground_contact = ground_contactDetected;
+		_landDetected.landed_state = _landed_hysteresis.get_state();
+		_landDetected.freefall_state = _freefall_hysteresis.get_state();
+		_landDetected.maybe_landed_state = _maybe_landed_hysteresis.get_state();
+		_landDetected.ground_contact_state = _ground_contact_hysteresis.get_state();
 		_landDetected.alt_max = alt_max;
 		_landDetected.in_ground_effect = in_ground_effect;
 

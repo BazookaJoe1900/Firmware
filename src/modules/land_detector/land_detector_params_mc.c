@@ -131,3 +131,29 @@ PARAM_DEFINE_FLOAT(LNDMC_ALT_MAX, -1.0f);
  *
  */
 PARAM_DEFINE_FLOAT(LNDMC_LOW_T_THR, 0.3);
+
+/**
+ * Landing conditions enable/disable
+ *
+ * @min 0
+ * @max 1
+ * @value 0 disable all
+ * @value 1 ground contact and motor shutdown are enabled only if in landing state
+ * @reboot_required true
+ * @group Land Detector
+ *
+ */
+PARAM_DEFINE_INT32(LNDMC_LND_TERMS, 0);
+
+/**
+ * Time in us that ground contact condition have to hold before triggering contact ground
+ *
+ * @unit ms
+ * @min 350
+ * @max 10000
+ * @decimal 0
+ * @reboot_required true
+ * @group Land Detector
+ *
+ */
+PARAM_DEFINE_INT32(LNDMC_GC_TRIG_T, 350);

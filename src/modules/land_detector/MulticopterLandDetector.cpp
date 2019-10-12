@@ -70,8 +70,12 @@
 namespace land_detector
 {
 
+hrt_abstime MulticopterLandDetector::_ground_contact_trigger_time_us = 350_ms;
+
 MulticopterLandDetector::MulticopterLandDetector()
 {
+	int32_t ground_contact_trigger_time_param;
+
 	_paramHandle.maxRotation = param_find("LNDMC_ROT_MAX");
 	_paramHandle.maxVelocity = param_find("LNDMC_XY_VEL_MAX");
 	_paramHandle.maxClimbRate = param_find("LNDMC_Z_VEL_MAX");
@@ -83,11 +87,18 @@ MulticopterLandDetector::MulticopterLandDetector()
 	_paramHandle.altitude_max = param_find("LNDMC_ALT_MAX");
 	_paramHandle.landSpeed = param_find("MPC_LAND_SPEED");
 	_paramHandle.low_thrust_threshold = param_find("LNDMC_LOW_T_THR");
+	_paramHandle.landTerms = param_find("LNDMC_LND_TERMS");
+
+	param_get(param_find("LNDMC_GC_TRIG_T"), &ground_contact_trigger_time_param);
+
+	if (ground_contact_trigger_time_param > 350) {
+		_ground_contact_trigger_time_us = ground_contact_trigger_time_param * 1000ULL;
+	}
 
 	// Use Trigger time when transitioning from in-air (false) to landed (true) / ground contact (true).
 	_landed_hysteresis.set_hysteresis_time_from(false, LAND_DETECTOR_TRIGGER_TIME_US);
 	_maybe_landed_hysteresis.set_hysteresis_time_from(false, MAYBE_LAND_DETECTOR_TRIGGER_TIME_US);
-	_ground_contact_hysteresis.set_hysteresis_time_from(false, GROUND_CONTACT_TRIGGER_TIME_US);
+	_ground_contact_hysteresis.set_hysteresis_time_from(false, _ground_contact_trigger_time_us);
 }
 
 void MulticopterLandDetector::_initialize_topics()
@@ -100,6 +111,8 @@ void MulticopterLandDetector::_initialize_topics()
 	_sensor_bias_sub = orb_subscribe(ORB_ID(sensor_bias));
 	_vehicle_control_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
 	_battery_sub = orb_subscribe(ORB_ID(battery_status));
+	_pos_sp_triplet_sub = orb_subscribe(ORB_ID(position_setpoint_triplet));
+	_vehicle_ctl_mode_sub = orb_subscribe(ORB_ID(vehicle_control_mode));
 }
 
 void MulticopterLandDetector::_update_topics()
@@ -111,6 +124,8 @@ void MulticopterLandDetector::_update_topics()
 	_orb_update(ORB_ID(sensor_bias), _sensor_bias_sub, &_sensors);
 	_orb_update(ORB_ID(vehicle_control_mode), _vehicle_control_mode_sub, &_control_mode);
 	_orb_update(ORB_ID(battery_status), _battery_sub, &_battery);
+	_orb_update(ORB_ID(position_setpoint_triplet), _pos_sp_triplet_sub, &_pos_sp_triplet);
+	_orb_update(ORB_ID(vehicle_control_mode), _vehicle_ctl_mode_sub, &_vehicle_ctl_mode);
 }
 
 void MulticopterLandDetector::_update_params()
@@ -128,7 +143,7 @@ void MulticopterLandDetector::_update_params()
 	param_get(_paramHandle.altitude_max, &_params.altitude_max);
 	param_get(_paramHandle.landSpeed, &_params.landSpeed);
 	param_get(_paramHandle.low_thrust_threshold, &_params.low_thrust_threshold);
-
+	param_get(_paramHandle.landTerms, &_params.landTerms);
 }
 
 
@@ -191,9 +206,21 @@ bool MulticopterLandDetector::_get_ground_contact_state()
 		      && (_vehicleLocalPositionSetpoint.vz >= land_speed_threshold);
 	bool hit_ground = _in_descend && !verticalMovement;
 
+	bool is_landing_state_condition = true;
+
+	if (_params.landTerms & ENABLE_LANDING_STATE_CONDITION) {
+		if (_vehicle_ctl_mode.flag_control_manual_enabled ||
+		    ((_pos_sp_triplet.current.type != position_setpoint_s::SETPOINT_TYPE_LAND)
+		     && (_pos_sp_triplet.current.type != position_setpoint_s::SETPOINT_TYPE_IDLE))) {
+			is_landing_state_condition = false;
+		}
+	}
+
 	// TODO: we need an accelerometer based check for vertical movement for flying without GPS
-	if ((_has_low_thrust() || hit_ground) && (!_horizontal_movement || !_has_position_lock())
-	    && (!verticalMovement || !_has_altitude_lock())) {
+	if ((_has_low_thrust() || hit_ground)
+	    && (!_horizontal_movement || !_has_position_lock())
+	    && (!verticalMovement || !_has_altitude_lock())
+	    && is_landing_state_condition) {
 		return true;
 	}
 

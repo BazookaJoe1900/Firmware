@@ -56,11 +56,18 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/vehicle_control_mode.h>
 #include <uORB/topics/vehicle_local_position.h>
+#include <uORB/topics/position_setpoint_triplet.h>
+#include <uORB/topics/vehicle_control_mode.h>
 
 using namespace time_literals;
 
 namespace land_detector
 {
+
+typedef enum {
+	DEFAULT_CONDITION = 0,
+	ENABLE_LANDING_STATE_CONDITION = 1
+} land_terms_t;
 
 class MulticopterLandDetector : public LandDetector
 {
@@ -88,7 +95,9 @@ private:
 	static constexpr hrt_abstime MAYBE_LAND_DETECTOR_TRIGGER_TIME_US = 250_ms;
 
 	/** Time in us that ground contact condition have to hold before triggering contact ground */
-	static constexpr hrt_abstime GROUND_CONTACT_TRIGGER_TIME_US = 350_ms;
+	/** No longer a variable, but param LNDMC_GC_TRIG_T */
+	//static constexpr hrt_abstime GROUND_CONTACT_TRIGGER_TIME_US = 350_ms;
+	static hrt_abstime _ground_contact_trigger_time_us;
 
 	/** Time interval in us in which wider acceptance thresholds are used after landed. */
 	static constexpr hrt_abstime LAND_DETECTOR_LAND_PHASE_TIME_US = 2_s;
@@ -108,6 +117,7 @@ private:
 		param_t altitude_max;
 		param_t landSpeed;
 		param_t low_thrust_threshold;
+		param_t landTerms;
 	} _paramHandle{};
 
 	struct {
@@ -122,6 +132,7 @@ private:
 		float altitude_max;
 		float landSpeed;
 		float low_thrust_threshold;
+		int32_t landTerms;
 	} _params{};
 
 	int _vehicleLocalPositionSub{ -1};
@@ -131,6 +142,8 @@ private:
 	int _sensor_bias_sub{ -1};
 	int _vehicle_control_mode_sub{ -1};
 	int _battery_sub{ -1};
+	int _pos_sp_triplet_sub{ -1};
+	int _vehicle_ctl_mode_sub{ -1};
 
 	vehicle_local_position_s				_vehicleLocalPosition {};
 	vehicle_local_position_setpoint_s	_vehicleLocalPositionSetpoint {};
@@ -139,6 +152,8 @@ private:
 	sensor_bias_s					_sensors {};
 	vehicle_control_mode_s				_control_mode {};
 	battery_status_s						_battery {};
+	position_setpoint_triplet_s				_pos_sp_triplet {};
+	vehicle_control_mode_s				_vehicle_ctl_mode {};
 
 	hrt_abstime _min_trust_start{0};		///< timestamp when minimum trust was applied first
 	hrt_abstime _landed_time{0};
