@@ -142,6 +142,8 @@ def sizeof_field_type(field):
     bare_name_str = bare_name(field.type)
     if bare_name_str in msgtype_size_map:
         return msgtype_size_map[bare_name_str]
+    elif field.is_enum_type:
+        return 4; #TODO:fix that, not all enums are 4 bytes
     return 0  # this is for non-builtin types: sort them at the end
 
 
@@ -168,11 +170,12 @@ def add_padding_bytes(fields, search_path):
     while i < len(fields):
         field = fields[i]
         if not field.is_header:
-            a_pos = field.type.find('[')
             array_size = 1
             if field.is_array:
                 array_size = field.array_len
             if field.is_builtin:
+                field.sizeof_field_type = sizeof_field_type(field)
+            elif field.is_enum_type:
                 field.sizeof_field_type = sizeof_field_type(field)
             else:
                 # embedded type: may need to add padding
@@ -205,22 +208,16 @@ def add_padding_bytes(fields, search_path):
         fields.append(padding_field)
     return (struct_size, num_padding_bytes)
 
-
-def convert_type(spec_type):
+def convert_type(field):
     """
     Convert from msg type to C type
     """
-    bare_type = spec_type
-    if '/' in spec_type:
-        # removing prefix
-        bare_type = (spec_type.split('/'))[1]
-
-    msg_type, is_array, array_length = genmsg.msgs.parse_type(bare_type)
-    c_type = msg_type
-    if msg_type in type_map:
-        c_type = type_map[msg_type]
-    if is_array:
-        return c_type + "[" + str(array_length) + "]"
+    if field.base_type in type_map:
+        c_type = type_map[field.base_type]
+    else:
+        c_type = field.base_type
+    if field.is_array:
+        return c_type + "[" + str(field.array_len) + "]"
     return c_type
 
 
@@ -237,38 +234,28 @@ def print_field(field):
     if field.name.startswith('_padding'):
         return
 
-    bare_type = field.type
-    if '/' in field.type:
-        # removing prefix
-        bare_type = (bare_type.split('/'))[1]
-
-    msg_type, is_array, array_length = genmsg.msgs.parse_type(bare_type)
-
     field_name = ""
 
-    if is_array:
+    if field.is_array:
         c_type = "["
 
-        if msg_type in type_map:
-            p_type = type_printf_map[msg_type]
+        if field.base_type in type_map:
+            p_type = type_printf_map[field.base_type]
 
         else:
-            for i in range(array_length):
-                print(("PX4_INFO_RAW(\"\\t" + field.type +
-                      " " + field.name + "[" + str(i) + "]\");"))
-                print((" print_message(message." +
-                      field.name + "[" + str(i) + "]);"))
+            for i in range(field.array_len):
+                print(("PX4_INFO_RAW(\"\\t" + field.type + " " + field.name + "[" + str(i) + "]\");"))
+                print((" print_message(message." + field.name + "[" + str(i) + "]);"))
             return
 
-        for i in range(array_length):
+        for i in range(field.array_len):
 
             if i > 0:
                 c_type += ", "
                 field_name += ", "
 
             if "float32" in field.type:
-                field_name += "(double)message." + \
-                    field.name + "[" + str(i) + "]"
+                field_name += "(double)message." + field.name + "[" + str(i) + "]"
             else:
                 field_name += "message." + field.name + "[" + str(i) + "]"
 
@@ -277,9 +264,9 @@ def print_field(field):
         c_type += "]"
 
     else:
-        c_type = msg_type
-        if msg_type in type_map:
-            c_type = type_printf_map[msg_type]
+        c_type = field.base_type
+        if field.base_type in type_map:
+            c_type = type_printf_map[field.base_type]
 
             field_name = "message." + field.name
 
@@ -289,7 +276,10 @@ def print_field(field):
             elif field.type == "bool":
                 c_type = '%s'
                 field_name = "(" + field_name + " ? \"True\" : \"False\")"
-
+        elif field.is_enum_type:
+#            print(("\tprint_enum(message." + field.name + ");"))
+            print(("PX4_INFO_RAW(\"\\t" + field.name + ": " + field.base_type + ": %d\\n\", (int32_t)message." + field.name + ");"))
+            return
         else:
             print(("PX4_INFO_RAW(\"\\n\\t" + field.name + "\");"))
             print(("\tprint_message(message." + field.name + ");"))
@@ -303,11 +293,10 @@ def print_field(field):
         print("char device_id_buffer[80];")
         print("device::Device::device_id_print_buffer(device_id_buffer, sizeof(device_id_buffer), message.device_id);")
         print("PX4_INFO_RAW(\"\\tdevice_id: %d (%s) \\n\", message.device_id, device_id_buffer);")
-    elif is_array and 'char' in field.type:
-        print(("PX4_INFO_RAW(\"\\t" + field.name + ": \\\"%." + str(array_length) + "s\\\" \\n\", message." + field.name + ");"))
+    elif field.is_array and 'char' in field.type:
+        print(("PX4_INFO_RAW(\"\\t" + field.name + ": \\\"%." + str(field.array_len) + "s\\\" \\n\", message." + field.name + ");"))
     else:
-        print(("PX4_INFO_RAW(\"\\t" + field.name + ": " +
-              c_type + "\\n\", " + field_name + ");"))
+        print(("PX4_INFO_RAW(\"\\t" + field.name + ": " + c_type + "\\n\", " + field_name + ");"))
 
 
 def print_field_def(field):
@@ -321,21 +310,24 @@ def print_field_def(field):
 
     type_name = field.type
     # detect embedded types
-    sl_pos = type_name.find('/')
     type_appendix = ''
     type_prefix = ''
-    if (sl_pos >= 0):
-        type_name = type_name[sl_pos + 1:]
+    if (field.is_enum_type):
+        type_name = type_name[type_name.find('/') + 1:]
+    elif (type_name.find('/') >= 0):
+        type_name = type_name[type_name.find('/') + 1:]
         type_prefix = 'struct '
         type_appendix = '_s'
 
     # detect arrays
     a_pos = type_name.find('[')
-    array_size = ''
+
     if (a_pos >= 0):
         # field is array
         array_size = type_name[a_pos:]
         type_name = type_name[:a_pos]
+    else:
+        array_size = ''
 
     if type_name in type_map:
         # need to add _t: int8 --> int8_t
@@ -343,9 +335,10 @@ def print_field_def(field):
     else:
         type_px4 = type_name
 
-    comment = ''
     if field.name.startswith('_padding'):
         comment = ' // required for logger'
+    else:
+        comment = ''
 
     print(('\t%s%s%s %s%s;%s' % (type_prefix, type_px4, type_appendix, field.name,
                                 array_size, comment)))

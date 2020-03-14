@@ -116,10 +116,8 @@ def generate_output_from_file(format_idx, filename, outputdir, package, template
     Converts a single .msg file to an uorb header/source file
     """
     msg_context = genmsg.msg_loader.MsgContext.create_default()
-    full_type_name = genmsg.gentools.compute_full_type_name(
-        package, os.path.basename(filename))
-    spec = genmsg.msg_loader.load_msg_from_file(
-        msg_context, filename, full_type_name)
+    full_type_name = genmsg.gentools.compute_full_type_name(package, os.path.basename(filename))
+    spec = genmsg.msg_loader.load_msg_from_file(msg_context, filename, full_type_name) #TODO: add enums here
     field_name_and_type = {}
     for field in spec.parsed_fields():
         field_name_and_type.update({field.name: field.type})
@@ -161,8 +159,7 @@ def generate_output_from_file(format_idx, filename, outputdir, package, template
         os.makedirs(outputdir)
 
     template_file = os.path.join(templatedir, TEMPLATE_FILE[format_idx])
-    output_file = os.path.join(outputdir, spec.short_name +
-                               OUTPUT_FILE_EXT[format_idx])
+    output_file = os.path.join(outputdir, spec.short_name + OUTPUT_FILE_EXT[format_idx])
 
     return generate_by_template(output_file, template_file, em_globals)
 

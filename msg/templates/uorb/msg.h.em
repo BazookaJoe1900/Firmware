@@ -19,7 +19,7 @@
 @###############################################
 /****************************************************************************
  *
- *   Copyright (C) 2013-2016 PX4 Development Team. All rights reserved.
+ *   Copyright (C) 2013-2020 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -77,9 +77,14 @@ topic_name = spec.short_name
 for field in spec.parsed_fields():
     if (not field.is_builtin):
         if (not field.is_header):
-            (package, name) = genmsg.names.package_resource_name(field.base_type)
-            package = package or spec.package # convert '' to package
-            print('#include <uORB/topics/%s.h>'%(name))
+            if (not field.is_enum_type):
+                (package, name) = genmsg.names.package_resource_name(field.base_type)
+                package = package or spec.package # convert '' to package
+                print('#include <uORB/topics/%s.h>'%(name))
+            else:
+                (package, name) = genmsg.names.package_resource_name(field.base_type)
+                package = package or spec.package # convert '' to package
+                print('//#include <uORB/topics/%s_enum.h>//Use external definition'%(name))
 }@
 
 @# Constants c style
@@ -107,6 +112,25 @@ def print_parsed_fields():
 #ifdef __cplusplus
 @#class @(uorb_struct) {
 struct __EXPORT @(uorb_struct) {
+@##############################
+@# Enum decleration
+@##############################
+@{
+def print_enums():
+    for enum in spec.enums:
+        type_name = enum.type
+        if type_name in type_map:
+            # need to add _t: int8 --> int8_t
+            type_px4 = type_map[type_name]
+        else:
+            raise Exception("Type {0} not supported, add to to template file!".format(type_name))
+        print('enum class %s : %s {'%(enum.name, type_px4))
+        for val in enum.vals_array:
+            print('\t%s = %s,'%(val.name, val.val_text))
+        print('};')
+        print('')
+}@
+@print_enums()
 @#public:
 #else
 struct @(uorb_struct) {
@@ -114,6 +138,9 @@ struct @(uorb_struct) {
 @print_parsed_fields()
 
 #ifdef __cplusplus
+@##############################
+@# Constants decleration
+@##############################
 @# Constants again c++-ified
 @{
 for constant in spec.constants:
