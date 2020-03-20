@@ -2272,7 +2272,7 @@ Mavlink::task_main(int argc, char *argv[])
 		vehicle_command_s vehicle_cmd;
 
 		if (cmd_sub.update(&vehicle_cmd)) {
-			if ((vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_CONTROL_HIGH_LATENCY) &&
+			if ((vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD::CONTROL_HIGH_LATENCY) &&
 			    (_mode == MAVLINK_MODE_IRIDIUM)) {
 				if (vehicle_cmd.param1 > 0.5f) {
 					if (!_transmitting_enabled) {
@@ -2296,8 +2296,8 @@ Mavlink::task_main(int argc, char *argv[])
 				// send positive command ack
 				vehicle_command_ack_s command_ack{};
 				command_ack.timestamp = vehicle_cmd.timestamp;
-				command_ack.command = vehicle_cmd.command;
-				command_ack.result = vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+				command_ack.command = (uint16_t)vehicle_cmd.command;
+				command_ack.result = (uint8_t)vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
 				command_ack.from_external = !vehicle_cmd.from_external;
 				command_ack.target_system = vehicle_cmd.source_system;
 				command_ack.target_component = vehicle_cmd.source_component;
@@ -2307,8 +2307,9 @@ Mavlink::task_main(int argc, char *argv[])
 		}
 
 		/* send command ACK */
-		uint16_t current_command_ack = 0;
-		vehicle_command_ack_s command_ack;
+		//TODO: might be error. this doesn't seems like correct default
+		vehicle_command_s::VEHICLE_CMD current_command_ack = vehicle_command_s::VEHICLE_CMD::CUSTOM_0;
+		vehicle_command_ack_s command_ack{};
 
 		if (ack_sub.update(&command_ack)) {
 			if (!command_ack.from_external) {
@@ -2319,7 +2320,7 @@ Mavlink::task_main(int argc, char *argv[])
 				msg.result_param2 = command_ack.result_param2;
 				msg.target_system = command_ack.target_system;
 				msg.target_component = command_ack.target_component;
-				current_command_ack = command_ack.command;
+				current_command_ack = (vehicle_command_s::VEHICLE_CMD)command_ack.command;
 
 				// TODO: always transmit the acknowledge once it is only sent over the instance the command is received
 				//bool _transmitting_enabled_temp = _transmitting_enabled;
@@ -2356,7 +2357,7 @@ Mavlink::task_main(int argc, char *argv[])
 				_mavlink_ulog_stop_requested = false;
 
 			} else {
-				if (current_command_ack == vehicle_command_s::VEHICLE_CMD_LOGGING_START) {
+				if (current_command_ack == vehicle_command_s::VEHICLE_CMD::LOGGING_START) {
 					_mavlink_ulog->start_ack_received();
 				}
 

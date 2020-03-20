@@ -265,21 +265,21 @@ int InputMavlinkCmdMount::update_impl(unsigned int timeout_ms, ControlData **con
 
 				_control_data.gimbal_shutter_retract = false;
 
-				if (vehicle_command.command == vehicle_command_s::VEHICLE_CMD_DO_MOUNT_CONTROL) {
+				if (vehicle_command.command == vehicle_command_s::VEHICLE_CMD::DO_MOUNT_CONTROL) {
 
-					switch ((int)vehicle_command.param7) {
-					case vehicle_command_s::VEHICLE_MOUNT_MODE_RETRACT:
+					switch ((vehicle_command_s::VEHICLE_MOUNT_MODE)vehicle_command.param7) {
+					case vehicle_command_s::VEHICLE_MOUNT_MODE::RETRACT:
 						_control_data.gimbal_shutter_retract = true;
 
 					/* FALLTHROUGH */
 
-					case vehicle_command_s::VEHICLE_MOUNT_MODE_NEUTRAL:
+					case vehicle_command_s::VEHICLE_MOUNT_MODE::NEUTRAL:
 						_control_data.type = ControlData::Type::Neutral;
 
 						*control_data = &_control_data;
 						break;
 
-					case vehicle_command_s::VEHICLE_MOUNT_MODE_MAVLINK_TARGETING:
+					case vehicle_command_s::VEHICLE_MOUNT_MODE::MAVLINK_TARGETING:
 						_control_data.type = ControlData::Type::Angle;
 						_control_data.type_data.angle.frames[0] = ControlData::TypeData::TypeAngle::Frame::AngleBodyFrame;
 						_control_data.type_data.angle.frames[1] = ControlData::TypeData::TypeAngle::Frame::AngleBodyFrame;
@@ -299,10 +299,10 @@ int InputMavlinkCmdMount::update_impl(unsigned int timeout_ms, ControlData **con
 						*control_data = &_control_data;
 						break;
 
-					case vehicle_command_s::VEHICLE_MOUNT_MODE_RC_TARGETING:
+					case vehicle_command_s::VEHICLE_MOUNT_MODE::RC_TARGETING:
 						break;
 
-					case vehicle_command_s::VEHICLE_MOUNT_MODE_GPS_POINT:
+					case vehicle_command_s::VEHICLE_MOUNT_MODE::GPS_POINT:
 						control_data_set_lon_lat((double)vehicle_command.param6, (double)vehicle_command.param5, vehicle_command.param4);
 
 						*control_data = &_control_data;
@@ -311,7 +311,7 @@ int InputMavlinkCmdMount::update_impl(unsigned int timeout_ms, ControlData **con
 
 					_ack_vehicle_command(&vehicle_command);
 
-				} else if (vehicle_command.command == vehicle_command_s::VEHICLE_CMD_DO_MOUNT_CONFIGURE) {
+				} else if (vehicle_command.command == vehicle_command_s::VEHICLE_CMD::DO_MOUNT_CONFIGURE) {
 					_stabilize[0] = (int)(vehicle_command.param2 + 0.5f) == 1;
 					_stabilize[1] = (int)(vehicle_command.param3 + 0.5f) == 1;
 					_stabilize[2] = (int)(vehicle_command.param4 + 0.5f) == 1;
@@ -364,8 +364,8 @@ void InputMavlinkCmdMount::_ack_vehicle_command(vehicle_command_s *cmd)
 	vehicle_command_ack_s vehicle_command_ack{};
 
 	vehicle_command_ack.timestamp = hrt_absolute_time();
-	vehicle_command_ack.command = cmd->command;
-	vehicle_command_ack.result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+	vehicle_command_ack.command = (uint16_t)cmd->command;
+	vehicle_command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 	vehicle_command_ack.target_system = cmd->source_system;
 	vehicle_command_ack.target_component = cmd->source_component;
 

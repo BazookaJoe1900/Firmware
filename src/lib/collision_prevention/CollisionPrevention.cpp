@@ -538,7 +538,7 @@ void CollisionPrevention::_publishVehicleCmdDoLoiter()
 {
 	vehicle_command_s command{};
 	command.timestamp = getTime();
-	command.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
+	command.command = vehicle_command_s::VEHICLE_CMD::DO_SET_MODE;
 	command.param1 = (float)1; // base mode
 	command.param3 = (float)0; // sub mode
 	command.target_system = 1;

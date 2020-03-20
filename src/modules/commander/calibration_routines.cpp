@@ -821,15 +821,16 @@ void calibrate_cancel_unsubscribe(int cmd_sub)
 	orb_unsubscribe(cmd_sub);
 }
 
-static void calibrate_answer_command(orb_advert_t *mavlink_log_pub, struct vehicle_command_s &cmd, unsigned result)
+static void calibrate_answer_command(orb_advert_t *mavlink_log_pub, struct vehicle_command_s &cmd,
+				     vehicle_command_s::VEHICLE_CMD_RESULT result)
 {
 	switch (result) {
-	case vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED:
+	case vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED:
 		tune_positive(true);
 		break;
 
-	case vehicle_command_s::VEHICLE_CMD_RESULT_DENIED:
-		mavlink_log_critical(mavlink_log_pub, "command denied during calibration: %u", cmd.command);
+	case vehicle_command_s::VEHICLE_CMD_RESULT::DENIED:
+		mavlink_log_critical(mavlink_log_pub, "command denied during calibration: %u", (uint16_t)cmd.command);
 		tune_negative(true);
 		break;
 
@@ -851,19 +852,19 @@ bool calibrate_cancel_check(orb_advert_t *mavlink_log_pub, int cancel_sub)
 
 		// ignore internal commands, such as VEHICLE_CMD_DO_MOUNT_CONTROL from vmount
 		if (cmd.from_external) {
-			if (cmd.command == vehicle_command_s::VEHICLE_CMD_PREFLIGHT_CALIBRATION &&
+			if (cmd.command == vehicle_command_s::VEHICLE_CMD::PREFLIGHT_CALIBRATION &&
 			    (int)cmd.param1 == 0 &&
 			    (int)cmd.param2 == 0 &&
 			    (int)cmd.param3 == 0 &&
 			    (int)cmd.param4 == 0 &&
 			    (int)cmd.param5 == 0 &&
 			    (int)cmd.param6 == 0) {
-				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 				mavlink_log_critical(mavlink_log_pub, CAL_QGC_CANCELLED_MSG);
 				return true;
 
 			} else {
-				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT_DENIED);
+				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT::DENIED);
 			}
 		}
 	}

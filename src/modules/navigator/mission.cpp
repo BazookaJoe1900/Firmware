@@ -138,7 +138,7 @@ Mission::on_inactivation()
 {
 	// Disable camera trigger
 	vehicle_command_s cmd = {};
-	cmd.command = vehicle_command_s::VEHICLE_CMD_DO_TRIGGER_CONTROL;
+	cmd.command = vehicle_command_s::VEHICLE_CMD::DO_TRIGGER_CONTROL;
 	// Pause trigger
 	cmd.param1 = -1.0f;
 	cmd.param3 = 1.0f;
@@ -164,7 +164,7 @@ Mission::on_activation()
 
 	// unpause triggering if it was paused
 	vehicle_command_s cmd = {};
-	cmd.command = vehicle_command_s::VEHICLE_CMD_DO_TRIGGER_CONTROL;
+	cmd.command = vehicle_command_s::VEHICLE_CMD::DO_TRIGGER_CONTROL;
 	// unpause trigger
 	cmd.param1 = -1.0f;
 	cmd.param3 = 0.0f;
@@ -1483,7 +1483,7 @@ Mission::do_abort_landing()
 	// send reposition cmd to get out of mission
 	vehicle_command_s vcmd = {};
 
-	vcmd.command = vehicle_command_s::VEHICLE_CMD_DO_REPOSITION;
+	vcmd.command = vehicle_command_s::VEHICLE_CMD::DO_REPOSITION;
 	vcmd.param1 = -1;
 	vcmd.param2 = 1;
 	vcmd.param5 = _mission_item.lat;

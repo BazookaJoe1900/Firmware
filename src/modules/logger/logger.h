@@ -290,7 +290,7 @@ private:
 	bool start_stop_logging();
 
 	void handle_vehicle_command_update();
-	void ack_vehicle_command(vehicle_command_s *cmd, uint32_t result);
+	void ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_s::VEHICLE_CMD_RESULT result);
 
 	/**
 	 * initialize the output for the process load, so that ~1 second later it will be written to the log

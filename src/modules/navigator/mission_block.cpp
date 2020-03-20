@@ -489,7 +489,7 @@ MissionBlock::issue_command(const mission_item_s &item)
 		// we're expecting a mission command item here so assign the "raw" inputs to the command
 		// (MAV_FRAME_MISSION mission item)
 		vehicle_command_s vcmd = {};
-		vcmd.command = item.nav_cmd;
+		vcmd.command = (vehicle_command_s::VEHICLE_CMD)item.nav_cmd;
 		vcmd.param1 = item.params[0];
 		vcmd.param2 = item.params[1];
 		vcmd.param3 = item.params[2];
@@ -703,7 +703,7 @@ MissionBlock::set_land_item(struct mission_item_s *item, bool at_current_locatio
 	if (_navigator->force_vtol()) {
 
 		vehicle_command_s vcmd = {};
-		vcmd.command = NAV_CMD_DO_VTOL_TRANSITION;
+		vcmd.command = (vehicle_command_s::VEHICLE_CMD)NAV_CMD_DO_VTOL_TRANSITION;
 		vcmd.param1 = vtol_vehicle_status_s::VEHICLE_VTOL_STATE_MC;
 		_navigator->publish_vehicle_cmd(&vcmd);
 	}

@@ -175,7 +175,7 @@ CameraCapture::Run()
 	if (_command_sub.update(&cmd)) {
 
 		// TODO : this should eventuallly be a capture control command
-		if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_TRIGGER_CONTROL) {
+		if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_TRIGGER_CONTROL) {
 
 			// Enable/disable signal capture
 			if (commandParamToInt(cmd.param1) == 1) {
@@ -196,8 +196,8 @@ CameraCapture::Run()
 			vehicle_command_ack_s command_ack{};
 
 			command_ack.timestamp = hrt_absolute_time();
-			command_ack.command = cmd.command;
-			command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+			command_ack.command = (uint16_t)cmd.command;
+			command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 			command_ack.target_system = cmd.source_system;
 			command_ack.target_component = cmd.source_component;
 

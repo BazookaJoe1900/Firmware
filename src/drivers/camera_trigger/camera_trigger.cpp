@@ -502,7 +502,7 @@ CameraTrigger::test()
 	vehicle_command_s vcmd{};
 	vcmd.timestamp = hrt_absolute_time();
 	vcmd.param5 = 1.0;
-	vcmd.command = vehicle_command_s::VEHICLE_CMD_DO_DIGICAM_CONTROL;
+	vcmd.command = vehicle_command_s::VEHICLE_CMD::DO_DIGICAM_CONTROL;
 
 	uORB::PublicationQueued<vehicle_command_s> vcmd_pub{ORB_ID(vehicle_command)};
 	vcmd_pub.publish(vcmd);
@@ -515,7 +515,7 @@ CameraTrigger::Run()
 	int poll_interval_usec = 5000;
 
 	vehicle_command_s cmd{};
-	unsigned cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
+	vehicle_command_s::VEHICLE_CMD_RESULT cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 	bool need_ack = false;
 
 	// this flag is set when the polling loop is slowed down to allow the camera to power on
@@ -529,7 +529,7 @@ CameraTrigger::Run()
 
 	// Command handling
 	if (updated) {
-		if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_DIGICAM_CONTROL) {
+		if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_DIGICAM_CONTROL) {
 
 			need_ack = true;
 			hrt_abstime now = hrt_absolute_time();
@@ -578,9 +578,9 @@ CameraTrigger::Run()
 				_trigger_enabled = false;
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
-		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_CAM_TRIGG_DIST) {
+		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_CAM_TRIGG_DIST) {
 
 			need_ack = true;
 
@@ -617,9 +617,9 @@ CameraTrigger::Run()
 				_one_shot = true;
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
-		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_CAM_TRIGG_INTERVAL) {
+		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_CAM_TRIGG_INTERVAL) {
 
 			need_ack = true;
 
@@ -636,7 +636,7 @@ CameraTrigger::Run()
 				}
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 		}
 	}
 
@@ -721,7 +721,7 @@ CameraTrigger::Run()
 		vehicle_command_ack_s command_ack{};
 
 		command_ack.timestamp = hrt_absolute_time();
-		command_ack.command = cmd.command;
+		command_ack.command = (uint16_t)cmd.command;
 		command_ack.result = (uint8_t)cmd_result;
 		command_ack.target_system = cmd.source_system;
 		command_ack.target_component = cmd.source_component;

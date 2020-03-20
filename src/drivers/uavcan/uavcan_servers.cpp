@@ -478,7 +478,7 @@ UavcanServers::run(pthread_addr_t)
 
 			uint8_t cmd_ack_result = vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
 
-			if (cmd.command == vehicle_command_s::VEHICLE_CMD_PREFLIGHT_UAVCAN) {
+			if (cmd.command == vehicle_command_s::VEHICLE_CMD::PREFLIGHT_UAVCAN) {
 				int command_id = static_cast<int>(cmd.param1 + 0.5f);
 				int node_id = static_cast<int>(cmd.param2 + 0.5f);
 				int call_res;
@@ -517,7 +517,7 @@ UavcanServers::run(pthread_addr_t)
 					}
 				}
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_PREFLIGHT_STORAGE) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::PREFLIGHT_STORAGE) {
 				int command_id = static_cast<int>(cmd.param1 + 0.5f);
 
 				PX4_INFO("UAVCAN command bridge: received storage command ID %d", command_id);
@@ -553,8 +553,8 @@ UavcanServers::run(pthread_addr_t)
 			// Acknowledge the received command
 			vehicle_command_ack_s ack{};
 			ack.timestamp = hrt_absolute_time();
-			ack.command = cmd.command;
-			ack.result = cmd_ack_result;
+			ack.command = (uint16_t)cmd.command;
+			ack.result = (uint16_t)cmd_ack_result;
 			ack.target_system = cmd.source_system;
 			ack.target_component = cmd.source_component;
 

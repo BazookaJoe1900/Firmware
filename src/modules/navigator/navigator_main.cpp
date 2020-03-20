@@ -220,13 +220,13 @@ Navigator::run()
 			vehicle_command_s cmd{};
 			_vehicle_command_sub.copy(&cmd);
 
-			if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_GO_AROUND) {
+			if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_GO_AROUND) {
 
 				// DO_GO_AROUND is currently handled by the position controller (unacknowledged)
 				// TODO: move DO_GO_AROUND handling to navigator
-				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_REPOSITION) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_REPOSITION) {
 
 				position_setpoint_triplet_s *rep = get_reposition_triplet();
 				position_setpoint_triplet_s *curr = get_position_setpoint_triplet();
@@ -301,7 +301,7 @@ Navigator::run()
 
 				// CMD_DO_REPOSITION is acknowledged by commander
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_NAV_TAKEOFF) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::NAV_TAKEOFF) {
 				position_setpoint_triplet_s *rep = get_takeoff_triplet();
 
 				// store current position as previous position and goal as next
@@ -344,14 +344,14 @@ Navigator::run()
 
 				// CMD_NAV_TAKEOFF is acknowledged by commander
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_LAND_START) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_LAND_START) {
 
 				/* find NAV_CMD_DO_LAND_START in the mission and
 				 * use MAV_CMD_MISSION_START to start the mission there
 				 */
 				if (_mission.land_start()) {
 					vehicle_command_s vcmd = {};
-					vcmd.command = vehicle_command_s::VEHICLE_CMD_MISSION_START;
+					vcmd.command = vehicle_command_s::VEHICLE_CMD::MISSION_START;
 					vcmd.param1 = _mission.get_land_start_index();
 					publish_vehicle_cmd(&vcmd);
 
@@ -359,9 +359,9 @@ Navigator::run()
 					PX4_WARN("planned mission landing not available");
 				}
 
-				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_MISSION_START) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::MISSION_START) {
 				if (_mission_result.valid && PX4_ISFINITE(cmd.param1) && (cmd.param1 >= 0)) {
 					if (!_mission.set_current_mission_index(cmd.param1)) {
 						PX4_WARN("CMD_MISSION_START failed");
@@ -370,7 +370,7 @@ Navigator::run()
 
 				// CMD_MISSION_START is acknowledged by commander
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_CHANGE_SPEED) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_CHANGE_SPEED) {
 				if (cmd.param2 > FLT_EPSILON) {
 					// XXX not differentiating ground and airspeed yet
 					set_cruising_speed(cmd.param2);
@@ -388,41 +388,41 @@ Navigator::run()
 				}
 
 				// TODO: handle responses for supported DO_CHANGE_SPEED options?
-				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 
-			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_ROI
-				   || cmd.command == vehicle_command_s::VEHICLE_CMD_NAV_ROI
-				   || cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_LOCATION
-				   || cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_WPNEXT_OFFSET
-				   || cmd.command == vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_NONE) {
+			} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_ROI
+				   || cmd.command == vehicle_command_s::VEHICLE_CMD::NAV_ROI
+				   || cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_LOCATION
+				   || cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_WPNEXT_OFFSET
+				   || cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_NONE) {
 				_vroi = {};
 
 				switch (cmd.command) {
-				case vehicle_command_s::VEHICLE_CMD_DO_SET_ROI:
-				case vehicle_command_s::VEHICLE_CMD_NAV_ROI:
+				case vehicle_command_s::VEHICLE_CMD::DO_SET_ROI:
+				case vehicle_command_s::VEHICLE_CMD::NAV_ROI:
 					_vroi.mode = cmd.param1;
 					break;
 
-				case vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_LOCATION:
-					_vroi.mode = vehicle_command_s::VEHICLE_ROI_LOCATION;
+				case vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_LOCATION:
+					_vroi.mode = (uint8_t)vehicle_command_s::VEHICLE_ROI::LOCATION;
 					_vroi.lat = cmd.param5;
 					_vroi.lon = cmd.param6;
 					_vroi.alt = cmd.param7;
 					break;
 
-				case vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_WPNEXT_OFFSET:
-					_vroi.mode = vehicle_command_s::VEHICLE_ROI_WPNEXT;
+				case vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_WPNEXT_OFFSET:
+					_vroi.mode = (uint8_t)vehicle_command_s::VEHICLE_ROI::WPNEXT;
 					_vroi.pitch_offset = (float)cmd.param5 * M_DEG_TO_RAD_F;
 					_vroi.roll_offset = (float)cmd.param6 * M_DEG_TO_RAD_F;
 					_vroi.yaw_offset = (float)cmd.param7 * M_DEG_TO_RAD_F;
 					break;
 
-				case vehicle_command_s::VEHICLE_CMD_DO_SET_ROI_NONE:
-					_vroi.mode = vehicle_command_s::VEHICLE_ROI_NONE;
+				case vehicle_command_s::VEHICLE_CMD::DO_SET_ROI_NONE:
+					_vroi.mode = (uint8_t)vehicle_command_s::VEHICLE_ROI::NONE;
 					break;
 
 				default:
-					_vroi.mode = vehicle_command_s::VEHICLE_ROI_NONE;
+					_vroi.mode = (uint8_t)vehicle_command_s::VEHICLE_ROI::NONE;
 					break;
 				}
 
@@ -430,7 +430,7 @@ Navigator::run()
 
 				_vehicle_roi_pub.publish(_vroi);
 
-				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				publish_vehicle_command_ack(cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 			}
 		}
 
@@ -1067,7 +1067,7 @@ void Navigator::check_traffic()
 
 							// ask the commander to execute an RTL
 							vehicle_command_s vcmd = {};
-							vcmd.command = vehicle_command_s::VEHICLE_CMD_NAV_RETURN_TO_LAUNCH;
+							vcmd.command = vehicle_command_s::VEHICLE_CMD::NAV_RETURN_TO_LAUNCH;
 							publish_vehicle_cmd(&vcmd);
 							break;
 						}
@@ -1081,7 +1081,7 @@ void Navigator::check_traffic()
 
 							// ask the commander to land
 							vehicle_command_s vcmd = {};
-							vcmd.command = vehicle_command_s::VEHICLE_CMD_NAV_LAND;
+							vcmd.command = vehicle_command_s::VEHICLE_CMD::NAV_LAND;
 							publish_vehicle_cmd(&vcmd);
 							break;
 
@@ -1096,7 +1096,7 @@ void Navigator::check_traffic()
 
 							// ask the commander to Loiter
 							vehicle_command_s vcmd = {};
-							vcmd.command = vehicle_command_s::VEHICLE_CMD_NAV_LOITER_UNLIM;
+							vcmd.command = vehicle_command_s::VEHICLE_CMD::NAV_LOITER_UNLIM;
 							publish_vehicle_cmd(&vcmd);
 							break;
 
@@ -1209,7 +1209,7 @@ Navigator::publish_vehicle_cmd(vehicle_command_s *vcmd)
 
 	// The camera commands are not processed on the autopilot but will be
 	// sent to the mavlink links to other components.
-	switch (vcmd->command) {
+	switch ((NAV_CMD)vcmd->command) {
 	case NAV_CMD_IMAGE_START_CAPTURE:
 	case NAV_CMD_IMAGE_STOP_CAPTURE:
 	case NAV_CMD_VIDEO_START_CAPTURE:
@@ -1226,17 +1226,17 @@ Navigator::publish_vehicle_cmd(vehicle_command_s *vcmd)
 }
 
 void
-Navigator::publish_vehicle_command_ack(const vehicle_command_s &cmd, uint8_t result)
+Navigator::publish_vehicle_command_ack(const vehicle_command_s &cmd, vehicle_command_s::VEHICLE_CMD_RESULT result)
 {
 	vehicle_command_ack_s command_ack = {};
 
 	command_ack.timestamp = hrt_absolute_time();
-	command_ack.command = cmd.command;
+	command_ack.command = (uint16_t)cmd.command;
 	command_ack.target_system = cmd.source_system;
 	command_ack.target_component = cmd.source_component;
 	command_ack.from_external = false;
 
-	command_ack.result = result;
+	command_ack.result = (uint8_t)result;
 	command_ack.result_param1 = 0;
 	command_ack.result_param2 = 0;
 

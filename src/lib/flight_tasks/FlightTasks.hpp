@@ -186,7 +186,7 @@ private:
 	 * Check for vehicle commands (received via MAVLink), evaluate and acknowledge them
 	 */
 	void _updateCommand();
-	FlightTaskIndex switchVehicleCommand(const int command);
+	FlightTaskIndex switchVehicleCommand(vehicle_command_s::VEHICLE_CMD command);
 
 	uORB::Subscription _sub_vehicle_command{ORB_ID(vehicle_command)}; /**< topic handle on which commands are received */
 

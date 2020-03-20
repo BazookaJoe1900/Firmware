@@ -87,7 +87,6 @@ DENIED = 2					# Command PERMANENTLY DENIED |
 UNSUPPORTED = 3				# Command UNKNOWN/UNSUPPORTED |
 FAILED = 4					# Command executed, but failed |
 IN_PROGRESS = 5				# Command being executed |
-ENUM_END = 6				#
 enum end
 
 enum start VEHICLE_MOUNT_MODE uint8
@@ -96,7 +95,6 @@ NEUTRAL = 1				# Load and keep neutral position (Roll,Pitch,Yaw) from permanent 
 MAVLINK_TARGETING = 2	# Load neutral position and start MAVLink Roll,Pitch,Yaw control with stabilization |
 RC_TARGETING = 3		# Load neutral position and start RC Roll,Pitch,Yaw control with stabilization |
 GPS_POINT = 4			# Load neutral position and start to point to Lat,Lon,Alt |
-ENUM_END = 5			#
 enum end
 
 enum start VEHICLE_ROI uint8
@@ -105,7 +103,6 @@ WPNEXT = 1				# Point toward next MISSION |
 WPINDEX = 2				# Point toward given MISSION |
 LOCATION = 3			# Point toward fixed location |
 TARGET = 4				# Point toward target
-ENUM_END = 5
 enum end
 
 uint8 ORB_QUEUE_LENGTH = 3
@@ -117,7 +114,7 @@ float32 param4			# Parameter 4, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float64 param5			# Parameter 5, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float64 param6			# Parameter 6, as defined by MAVLink uint16 VEHICLE_CMD enum.
 float32 param7			# Parameter 7, as defined by MAVLink uint16 VEHICLE_CMD enum.
-uint16 command			# Command ID, as defined MAVLink by uint16 VEHICLE_CMD enum.
+enum VEHICLE_CMD command	# Command ID, as defined MAVLink by uint16 VEHICLE_CMD enum.
 uint8 target_system		# System which should execute the command
 uint8 target_component		# Component which should execute the command, 0 for all components
 uint8 source_system		# System sending the command

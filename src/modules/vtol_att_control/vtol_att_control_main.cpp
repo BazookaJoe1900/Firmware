@@ -146,7 +146,7 @@ void
 VtolAttitudeControl::handle_command()
 {
 	// update transition command if necessary
-	if (_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD_DO_VTOL_TRANSITION) {
+	if (_vehicle_cmd.command == vehicle_command_s::VEHICLE_CMD::DO_VTOL_TRANSITION) {
 		_transition_command = int(_vehicle_cmd.param1 + 0.5f);
 
 		// Report that we have received the command no matter what we actually do with it.

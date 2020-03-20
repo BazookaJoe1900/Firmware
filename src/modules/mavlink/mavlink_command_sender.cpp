@@ -73,7 +73,7 @@ int MavlinkCommandSender::handle_vehicle_command(const struct vehicle_command_s 
 	mavlink_command_long_t msg = {};
 	msg.target_system = command.target_system;
 	msg.target_component = command.target_component;
-	msg.command = command.command;
+	msg.command = (uint16_t)command.command;
 	msg.confirmation = command.confirmation;
 	msg.param1 = command.param1;
 	msg.param2 = command.param2;

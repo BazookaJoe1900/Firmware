@@ -79,7 +79,7 @@ firstLowercase = lambda s: s[:1].lower() + s[1:] if s else ''
 	return 0;
 }
 
-FlightTaskIndex FlightTasks::switchVehicleCommand(const int command)
+FlightTaskIndex FlightTasks::switchVehicleCommand(vehicle_command_s::VEHICLE_CMD command)
 {
     switch (command) {
 @# loop through all additional tasks
@@ -88,7 +88,7 @@ FlightTaskIndex FlightTasks::switchVehicleCommand(const int command)
 @{
 upperCase = lambda s: s[:].upper() if s else ''
 }@
-	case vehicle_command_s::VEHICLE_CMD_DO_@(upperCase(task)) :
+	case vehicle_command_s::VEHICLE_CMD::DO_@(upperCase(task)) :
 		return FlightTaskIndex::@(task);
 		break;
 

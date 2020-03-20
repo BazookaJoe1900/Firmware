@@ -423,7 +423,7 @@ MavlinkReceiver::handle_message_command_long(mavlink_message_t *msg)
 	vcmd.param5 = (double)cmd_mavlink.param5;
 	vcmd.param6 = (double)cmd_mavlink.param6;
 	vcmd.param7 = cmd_mavlink.param7;
-	vcmd.command = cmd_mavlink.command;
+	vcmd.command = (vehicle_command_s::VEHICLE_CMD)cmd_mavlink.command;
 	vcmd.target_system = cmd_mavlink.target_system;
 	vcmd.target_component = cmd_mavlink.target_component;
 	vcmd.source_system = msg->sysid;
@@ -452,7 +452,7 @@ MavlinkReceiver::handle_message_command_int(mavlink_message_t *msg)
 	vcmd.param5 = ((double)cmd_mavlink.x) / 1e7;
 	vcmd.param6 = ((double)cmd_mavlink.y) / 1e7;
 	vcmd.param7 = cmd_mavlink.z;
-	vcmd.command = cmd_mavlink.command;
+	vcmd.command = (vehicle_command_s::VEHICLE_CMD)cmd_mavlink.command;
 	vcmd.target_system = cmd_mavlink.target_system;
 	vcmd.target_component = cmd_mavlink.target_component;
 	vcmd.source_system = msg->sysid;
@@ -700,7 +700,7 @@ MavlinkReceiver::handle_message_set_mode(mavlink_message_t *msg)
 	vcmd.param2 = (float)custom_mode.main_mode;
 	vcmd.param3 = (float)custom_mode.sub_mode;
 
-	vcmd.command = vehicle_command_s::VEHICLE_CMD_DO_SET_MODE;
+	vcmd.command = vehicle_command_s::VEHICLE_CMD::DO_SET_MODE;
 	vcmd.target_system = new_mode.target_system;
 	vcmd.target_component = MAV_COMP_ID_ALL;
 	vcmd.source_system = msg->sysid;

@@ -753,7 +753,7 @@ PX4IO::init()
 			/* send command to terminate flight via command API */
 			vcmd.timestamp = hrt_absolute_time();
 			vcmd.param1 = 1.0f; /* request flight termination */
-			vcmd.command = vehicle_command_s::VEHICLE_CMD_DO_FLIGHTTERMINATION;
+			vcmd.command = vehicle_command_s::VEHICLE_CMD::DO_FLIGHTTERMINATION;
 
 			/* send command once */
 			uORB::PublicationQueued<vehicle_command_s> vcmd_pub{ORB_ID(vehicle_command)};
@@ -786,7 +786,7 @@ PX4IO::init()
 		vcmd.timestamp = hrt_absolute_time();
 		vcmd.param1 = 1.0f; /* request arming */
 		vcmd.param3 = 1234.f; /* mark the command coming from IO (for in-air restoring) */
-		vcmd.command = vehicle_command_s::VEHICLE_CMD_COMPONENT_ARM_DISARM;
+		vcmd.command = vehicle_command_s::VEHICLE_CMD::COMPONENT_ARM_DISARM;
 
 		/* send command once */
 		uORB::PublicationQueued<vehicle_command_s> vcmd_pub{ORB_ID(vehicle_command)};
@@ -1012,7 +1012,7 @@ PX4IO::task_main()
 				_t_vehicle_command.copy(&cmd);
 
 				// Check for a DSM pairing command
-				if (((unsigned int)cmd.command == vehicle_command_s::VEHICLE_CMD_START_RX_PAIR) && ((int)cmd.param1 == 0)) {
+				if ((cmd.command == vehicle_command_s::VEHICLE_CMD::START_RX_PAIR) && ((int)cmd.param1 == 0)) {
 					dsm_bind_ioctl((int)cmd.param2);
 				}
 			}

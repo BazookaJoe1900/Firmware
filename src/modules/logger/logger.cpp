@@ -1011,22 +1011,22 @@ void Logger::handle_vehicle_command_update()
 
 	if (_vehicle_command_sub.update(&command)) {
 
-		if (command.command == vehicle_command_s::VEHICLE_CMD_LOGGING_START) {
+		if (command.command == vehicle_command_s::VEHICLE_CMD::LOGGING_START) {
 
 			if ((int)(command.param1 + 0.5f) != 0) {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT_UNSUPPORTED);
+				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::UNSUPPORTED);
 
 			} else if (can_start_mavlink_log()) {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 				start_log_mavlink();
 
 			} else {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED);
+				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED);
 			}
 
-		} else if (command.command == vehicle_command_s::VEHICLE_CMD_LOGGING_STOP) {
+		} else if (command.command == vehicle_command_s::VEHICLE_CMD::LOGGING_STOP) {
 			stop_log_mavlink();
-			ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED);
+			ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
 		}
 	}
 }
@@ -1932,11 +1932,11 @@ void Logger::write_changed_parameters(LogType type)
 	_writer.notify();
 }
 
-void Logger::ack_vehicle_command(vehicle_command_s *cmd, uint32_t result)
+void Logger::ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_s::VEHICLE_CMD_RESULT result)
 {
 	vehicle_command_ack_s vehicle_command_ack = {};
 	vehicle_command_ack.timestamp = hrt_absolute_time();
-	vehicle_command_ack.command = cmd->command;
+	vehicle_command_ack.command = (uint16_t)cmd->command;
 	vehicle_command_ack.result = (uint8_t)result;
 	vehicle_command_ack.target_system = cmd->source_system;
 	vehicle_command_ack.target_component = cmd->source_component;

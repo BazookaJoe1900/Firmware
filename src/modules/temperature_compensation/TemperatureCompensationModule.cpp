@@ -210,7 +210,7 @@ void TemperatureCompensationModule::Run()
 		vehicle_command_s cmd;
 
 		if (_vehicle_command_sub.copy(&cmd)) {
-			if (cmd.command == vehicle_command_s::VEHICLE_CMD_PREFLIGHT_CALIBRATION) {
+			if (cmd.command == vehicle_command_s::VEHICLE_CMD::PREFLIGHT_CALIBRATION) {
 				bool got_temperature_calibration_command = false;
 				bool accel = false;
 				bool baro = false;
@@ -238,14 +238,14 @@ void TemperatureCompensationModule::Run()
 					vehicle_command_ack_s command_ack{};
 
 					if (ret == 0) {
-						command_ack.result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+						command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 					} else {
-						command_ack.result = vehicle_command_s::VEHICLE_CMD_RESULT_FAILED;
+						command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::FAILED;
 					}
 
 					command_ack.timestamp = hrt_absolute_time();
-					command_ack.command = cmd.command;
+					command_ack.command = (uint16_t)cmd.command;
 					command_ack.target_system = cmd.source_system;
 					command_ack.target_component = cmd.source_component;
 
@@ -366,7 +366,7 @@ int TemperatureCompensationModule::custom_command(int argc, char *argv[])
 		vcmd.param6 = (double)NAN;
 		vcmd.param7 = (float)((baro_calib
 				       || calib_all) ? vehicle_command_s::PREFLIGHT_CALIBRATION_TEMPERATURE_CALIBRATION : NAN);
-		vcmd.command = vehicle_command_s::VEHICLE_CMD_PREFLIGHT_CALIBRATION;
+		vcmd.command = vehicle_command_s::VEHICLE_CMD::PREFLIGHT_CALIBRATION;
 
 		uORB::PublicationQueued<vehicle_command_s> vcmd_pub{ORB_ID(vehicle_command)};
 		vcmd_pub.publish(vcmd);

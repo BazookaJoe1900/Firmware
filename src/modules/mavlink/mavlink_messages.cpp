@@ -2242,7 +2242,7 @@ protected:
 				vcmd.param5 = (double)NAN;
 				vcmd.param6 = (double)NAN;
 				vcmd.param7 = NAN;
-				vcmd.command = MAV_CMD_IMAGE_START_CAPTURE;
+				vcmd.command = (vehicle_command_s::VEHICLE_CMD)MAV_CMD_IMAGE_START_CAPTURE;
 				vcmd.target_system = mavlink_system.sysid;
 				vcmd.target_component = MAV_COMP_ID_CAMERA;
 
@@ -2254,7 +2254,7 @@ protected:
 
 				digicam_ctrl_cmd.target_system = 0; // 0 for broadcast
 				digicam_ctrl_cmd.target_component = MAV_COMP_ID_CAMERA;
-				digicam_ctrl_cmd.command = MAV_CMD_DO_DIGICAM_CONTROL;
+				digicam_ctrl_cmd.command = (uint16_t)MAV_CMD_DO_DIGICAM_CONTROL;
 				digicam_ctrl_cmd.confirmation = 0;
 				digicam_ctrl_cmd.param1 = NAN;
 				digicam_ctrl_cmd.param2 = NAN;
@@ -3879,15 +3879,15 @@ protected:
 
 				switch (traj_wp_avoidance_desired.waypoints[i].type) {
 				case position_setpoint_s::SETPOINT_TYPE_TAKEOFF:
-					msg.command[i] = vehicle_command_s::VEHICLE_CMD_NAV_TAKEOFF;
+					msg.command[i] = (uint16_t)vehicle_command_s::VEHICLE_CMD::NAV_TAKEOFF;
 					break;
 
 				case position_setpoint_s::SETPOINT_TYPE_LOITER:
-					msg.command[i] = vehicle_command_s::VEHICLE_CMD_NAV_LOITER_UNLIM;
+					msg.command[i] = (uint16_t)vehicle_command_s::VEHICLE_CMD::NAV_LOITER_UNLIM;
 					break;
 
 				case position_setpoint_s::SETPOINT_TYPE_LAND:
-					msg.command[i] = vehicle_command_s::VEHICLE_CMD_NAV_LAND;
+					msg.command[i] = (uint16_t)vehicle_command_s::VEHICLE_CMD::NAV_LAND;
 					break;
 
 				default:

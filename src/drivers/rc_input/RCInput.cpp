@@ -274,7 +274,7 @@ void RCInput::Run()
 
 		if (_vehicle_cmd_sub.update(&vcmd)) {
 			// Check for a pairing command
-			if ((unsigned int)vcmd.command == vehicle_command_s::VEHICLE_CMD_START_RX_PAIR) {
+			if (vcmd.command == vehicle_command_s::VEHICLE_CMD::START_RX_PAIR) {
 				if (!_rc_scan_locked /* !_armed.armed */) { // TODO: add armed check?
 					if ((int)vcmd.param1 == 0) {
 						// DSM binding command

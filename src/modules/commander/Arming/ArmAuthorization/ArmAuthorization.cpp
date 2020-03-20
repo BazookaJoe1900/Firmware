@@ -83,7 +83,7 @@ static void arm_auth_request_msg_send()
 {
 	vehicle_command_s vcmd{};
 	vcmd.timestamp = hrt_absolute_time();
-	vcmd.command = vehicle_command_s::VEHICLE_CMD_ARM_AUTHORIZATION_REQUEST;
+	vcmd.command = vehicle_command_s::VEHICLE_CMD::ARM_AUTHORIZATION_REQUEST;
 	vcmd.target_system = arm_parameters.struct_value.authorizer_system_id;
 
 	uORB::PublicationQueued<vehicle_command_s> vcmd_pub{ORB_ID(vehicle_command)};
@@ -214,7 +214,7 @@ void arm_auth_update(hrt_abstime now, bool param_update)
 	}
 
 	if (updated
-	    && command_ack.command == vehicle_command_s::VEHICLE_CMD_ARM_AUTHORIZATION_REQUEST
+	    && command_ack.command == (uint16_t)vehicle_command_s::VEHICLE_CMD::ARM_AUTHORIZATION_REQUEST
 	    && command_ack.target_system == *system_id) {
 		switch (command_ack.result) {
 		case vehicle_command_ack_s::VEHICLE_RESULT_IN_PROGRESS:

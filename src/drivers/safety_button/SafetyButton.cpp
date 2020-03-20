@@ -134,7 +134,7 @@ SafetyButton::CheckPairingRequest(bool button_pressed)
 
 
 		vehicle_command_s vcmd{};
-		vcmd.command = vehicle_command_s::VEHICLE_CMD_START_RX_PAIR;
+		vcmd.command = vehicle_command_s::VEHICLE_CMD::START_RX_PAIR;
 		vcmd.timestamp = now;
 		vcmd.param1 = 10.f; // GCS pairing request handled by a companion.
 		_to_command.publish(vcmd);

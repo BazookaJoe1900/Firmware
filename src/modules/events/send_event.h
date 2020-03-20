@@ -90,7 +90,7 @@ private:
 	 * @param cmd The vehicle command struct being referenced.
 	 * @param result The command acknowledgement result.
 	 */
-	void answer_command(const vehicle_command_s &cmd, unsigned result);
+	void answer_command(const vehicle_command_s &cmd, vehicle_command_s::VEHICLE_CMD_RESULT result);
 
 	/**
 	 * @brief Calls process_commands() and schedules the next cycle.

@@ -168,8 +168,8 @@ void FlightTasks::_updateCommand()
 	// send back acknowledgment
 	vehicle_command_ack_s command_ack{};
 	command_ack.timestamp = hrt_absolute_time();
-	command_ack.command = command.command;
-	command_ack.result = cmd_result;
+	command_ack.command = (uint16_t)command.command;
+	command_ack.result = (uint8_t)cmd_result;
 	command_ack.result_param1 = static_cast<int>(switch_result);
 	command_ack.target_system = command.source_system;
 	command_ack.target_component = command.source_component;

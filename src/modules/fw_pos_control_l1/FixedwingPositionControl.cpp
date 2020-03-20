@@ -1455,7 +1455,7 @@ FixedwingPositionControl::get_tecs_thrust()
 void
 FixedwingPositionControl::handle_command()
 {
-	if (_vehicle_command.command == vehicle_command_s::VEHICLE_CMD_DO_GO_AROUND) {
+	if (_vehicle_command.command == vehicle_command_s::VEHICLE_CMD::DO_GO_AROUND) {
 		// only abort landing before point of no return (horizontal and vertical)
 		if (_control_mode.flag_control_auto_enabled &&
 		    _pos_sp_triplet.current.valid &&
