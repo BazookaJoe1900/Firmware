@@ -93,5 +93,4 @@ void print_message(const @uorb_struct &message)
 	@( print_field(field) )@
 @[end for]@
 @[end if]@
-
 }
