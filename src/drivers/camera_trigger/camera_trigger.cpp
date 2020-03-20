@@ -515,7 +515,7 @@ CameraTrigger::Run()
 	int poll_interval_usec = 5000;
 
 	vehicle_command_s cmd{};
-	vehicle_command_s::VEHICLE_CMD_RESULT cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
+	vehicle_command_ack_s::VEHICLE_CMD_RESULT cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 	bool need_ack = false;
 
 	// this flag is set when the polling loop is slowed down to allow the camera to power on
@@ -536,7 +536,7 @@ CameraTrigger::Run()
 
 			if (now - _last_trigger_timestamp < _min_interval * 1000) {
 				// triggering too fast, abort
-				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
+				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 
 			} else {
 				if (commandParamToInt(cmd.param7) == 1) {
@@ -551,7 +551,7 @@ CameraTrigger::Run()
 
 				}
 
-				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 			}
 
 		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_TRIGGER_CONTROL) {
@@ -578,7 +578,7 @@ CameraTrigger::Run()
 				_trigger_enabled = false;
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_CAM_TRIGG_DIST) {
 
@@ -617,7 +617,7 @@ CameraTrigger::Run()
 				_one_shot = true;
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_SET_CAM_TRIGG_INTERVAL) {
 
@@ -636,7 +636,7 @@ CameraTrigger::Run()
 				}
 			}
 
-			cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 		}
 	}
 
@@ -722,7 +722,7 @@ CameraTrigger::Run()
 
 		command_ack.timestamp = hrt_absolute_time();
 		command_ack.command = (uint16_t)cmd.command;
-		command_ack.result = (uint8_t)cmd_result;
+		command_ack.result = cmd_result;
 		command_ack.target_system = cmd.source_system;
 		command_ack.target_component = cmd.source_component;
 

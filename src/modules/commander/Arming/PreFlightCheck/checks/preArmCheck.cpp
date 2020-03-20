@@ -155,7 +155,7 @@ bool PreFlightCheck::preArmCheck(orb_advert_t *mavlink_log_pub, const vehicle_st
 	// Arm Requirements: authorization
 	// check last, and only if everything else has passed
 	if (arm_requirements.arm_authorization && prearm_ok) {
-		if (arm_auth_check() != vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED) {
+		if (arm_auth_check() != vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED) {
 			// feedback provided in arm_auth_check
 			prearm_ok = false;
 		}

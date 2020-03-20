@@ -2297,7 +2297,7 @@ Mavlink::task_main(int argc, char *argv[])
 				vehicle_command_ack_s command_ack{};
 				command_ack.timestamp = vehicle_cmd.timestamp;
 				command_ack.command = (uint16_t)vehicle_cmd.command;
-				command_ack.result = (uint8_t)vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+				command_ack.result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 				command_ack.from_external = !vehicle_cmd.from_external;
 				command_ack.target_system = vehicle_cmd.source_system;
 				command_ack.target_component = vehicle_cmd.source_component;
@@ -2314,7 +2314,7 @@ Mavlink::task_main(int argc, char *argv[])
 		if (ack_sub.update(&command_ack)) {
 			if (!command_ack.from_external) {
 				mavlink_command_ack_t msg;
-				msg.result = command_ack.result;
+				msg.result = (uint8_t)command_ack.result;
 				msg.command = command_ack.command;
 				msg.progress = command_ack.result_param1;
 				msg.result_param2 = command_ack.result_param2;

@@ -118,7 +118,7 @@ public:
 
 private:
 
-	void acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, uint8_t result);
+	void acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, vehicle_command_ack_s::VEHICLE_CMD_RESULT result);
 
 	/**
 	 * Common method to handle both mavlink command types. T is one of mavlink_command_int_t or mavlink_command_long_t.

@@ -365,7 +365,7 @@ void InputMavlinkCmdMount::_ack_vehicle_command(vehicle_command_s *cmd)
 
 	vehicle_command_ack.timestamp = hrt_absolute_time();
 	vehicle_command_ack.command = (uint16_t)cmd->command;
-	vehicle_command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+	vehicle_command_ack.result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 	vehicle_command_ack.target_system = cmd->source_system;
 	vehicle_command_ack.target_component = cmd->source_component;
 

@@ -71,10 +71,10 @@ union {
 
 static uint8_t *system_id;
 
-static uint8_t _auth_method_arm_req_check();
-static uint8_t _auth_method_two_arm_check();
+static vehicle_command_ack_s::VEHICLE_CMD_RESULT _auth_method_arm_req_check();
+static vehicle_command_ack_s::VEHICLE_CMD_RESULT _auth_method_two_arm_check();
 
-static uint8_t (*arm_check_method[ARM_AUTH_METHOD_LAST])() = {
+static vehicle_command_ack_s::VEHICLE_CMD_RESULT(*arm_check_method[ARM_AUTH_METHOD_LAST])() = {
 	_auth_method_arm_req_check,
 	_auth_method_two_arm_check,
 };
@@ -90,7 +90,7 @@ static void arm_auth_request_msg_send()
 	vcmd_pub.publish(vcmd);
 }
 
-static uint8_t _auth_method_arm_req_check()
+static vehicle_command_ack_s::VEHICLE_CMD_RESULT _auth_method_arm_req_check()
 {
 	switch (state) {
 	case ARM_AUTH_IDLE:
@@ -98,10 +98,10 @@ static uint8_t _auth_method_arm_req_check()
 		break;
 
 	case ARM_AUTH_MISSION_APPROVED:
-		return vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+		return vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 	default:
-		return vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+		return vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 	}
 
 	/* handling ARM_AUTH_IDLE */
@@ -135,10 +135,10 @@ static uint8_t _auth_method_arm_req_check()
 	}
 
 	return state == ARM_AUTH_MISSION_APPROVED ?
-	       vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED : vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+	       vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED : vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 }
 
-static uint8_t _auth_method_two_arm_check()
+static vehicle_command_ack_s::VEHICLE_CMD_RESULT _auth_method_two_arm_check()
 {
 	switch (state) {
 	case ARM_AUTH_IDLE:
@@ -146,14 +146,14 @@ static uint8_t _auth_method_two_arm_check()
 		break;
 
 	case ARM_AUTH_MISSION_APPROVED:
-		return vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+		return vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 	case ARM_AUTH_WAITING_AUTH:
 	case ARM_AUTH_WAITING_AUTH_WITH_ACK:
-		return vehicle_command_ack_s::VEHICLE_RESULT_TEMPORARILY_REJECTED;
+		return vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 
 	default:
-		return vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+		return vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 	}
 
 	/* handling ARM_AUTH_IDLE */
@@ -165,16 +165,16 @@ static uint8_t _auth_method_two_arm_check()
 
 	mavlink_log_critical(mavlink_log_pub, "Arm auth: Requesting authorization...");
 
-	return vehicle_command_ack_s::VEHICLE_RESULT_TEMPORARILY_REJECTED;
+	return vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 }
 
-uint8_t arm_auth_check()
+vehicle_command_ack_s::VEHICLE_CMD_RESULT arm_auth_check()
 {
 	if (arm_parameters.struct_value.authentication_method < ARM_AUTH_METHOD_LAST) {
 		return arm_check_method[arm_parameters.struct_value.authentication_method]();
 	}
 
-	return vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+	return vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 }
 
 void arm_auth_update(hrt_abstime now, bool param_update)
@@ -217,11 +217,11 @@ void arm_auth_update(hrt_abstime now, bool param_update)
 	    && command_ack.command == (uint16_t)vehicle_command_s::VEHICLE_CMD::ARM_AUTHORIZATION_REQUEST
 	    && command_ack.target_system == *system_id) {
 		switch (command_ack.result) {
-		case vehicle_command_ack_s::VEHICLE_RESULT_IN_PROGRESS:
+		case vehicle_command_ack_s::VEHICLE_CMD_RESULT::IN_PROGRESS:
 			state = ARM_AUTH_WAITING_AUTH_WITH_ACK;
 			break;
 
-		case vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED:
+		case vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED:
 			mavlink_log_critical(mavlink_log_pub,
 					     "Arm auth: Authorized for the next %u seconds",
 					     command_ack.result_param2);
@@ -229,12 +229,12 @@ void arm_auth_update(hrt_abstime now, bool param_update)
 			auth_timeout = now + (command_ack.result_param2 * 1000000);
 			return;
 
-		case vehicle_command_ack_s::VEHICLE_RESULT_TEMPORARILY_REJECTED:
+		case vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED:
 			mavlink_log_critical(mavlink_log_pub, "Arm auth: Temporarily rejected");
 			state = ARM_AUTH_IDLE;
 			return;
 
-		case vehicle_command_ack_s::VEHICLE_RESULT_DENIED:
+		case vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED:
 		default:
 			switch (command_ack.result_param1) {
 			case vehicle_command_ack_s::ARM_AUTH_DENIED_REASON_NONE:

@@ -238,10 +238,10 @@ void TemperatureCompensationModule::Run()
 					vehicle_command_ack_s command_ack{};
 
 					if (ret == 0) {
-						command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
+						command_ack.result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 					} else {
-						command_ack.result = (uint8_t)vehicle_command_s::VEHICLE_CMD_RESULT::FAILED;
+						command_ack.result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED;
 					}
 
 					command_ack.timestamp = hrt_absolute_time();

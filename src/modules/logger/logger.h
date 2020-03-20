@@ -54,6 +54,7 @@
 #include <uORB/topics/vehicle_command.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/vehicle_command_ack.h>
 
 extern "C" __EXPORT int logger_main(int argc, char *argv[]);
 
@@ -290,7 +291,7 @@ private:
 	bool start_stop_logging();
 
 	void handle_vehicle_command_update();
-	void ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_s::VEHICLE_CMD_RESULT result);
+	void ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT result);
 
 	/**
 	 * initialize the output for the process load, so that ~1 second later it will be written to the log

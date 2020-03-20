@@ -37,6 +37,7 @@
 
 #include <drivers/drv_hrt.h>
 #include <uORB/uORB.h>
+#include <uORB/topics/vehicle_command_ack.h>
 
 enum arm_auth_methods {
 	ARM_AUTH_METHOD_ARM_REQ = 0,
@@ -46,5 +47,5 @@ enum arm_auth_methods {
 
 void arm_auth_init(orb_advert_t *mav_log_pub, uint8_t *system_id);
 void arm_auth_update(hrt_abstime now, bool param_update = true);
-uint8_t arm_auth_check();
+vehicle_command_ack_s::VEHICLE_CMD_RESULT arm_auth_check();
 enum arm_auth_methods arm_auth_method_get();

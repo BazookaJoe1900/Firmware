@@ -80,15 +80,6 @@ enum end
 
 uint16 PREFLIGHT_CALIBRATION_TEMPERATURE_CALIBRATION = 3		# param value for VEHICLE_CMD_PREFLIGHT_CALIBRATION to start temperature calibration
 
-enum start VEHICLE_CMD_RESULT uint8
-ACCEPTED = 0				# Command ACCEPTED and EXECUTED |
-TEMPORARILY_REJECTED = 1	# Command TEMPORARY REJECTED/DENIED |
-DENIED = 2					# Command PERMANENTLY DENIED |
-UNSUPPORTED = 3				# Command UNKNOWN/UNSUPPORTED |
-FAILED = 4					# Command executed, but failed |
-IN_PROGRESS = 5				# Command being executed |
-enum end
-
 enum start VEHICLE_MOUNT_MODE uint8
 RETRACT = 0				# Load and keep safe position (Roll,Pitch,Yaw) from permanent memory and stop stabilization |
 NEUTRAL = 1				# Load and keep neutral position (Roll,Pitch,Yaw) from permanent memory. |

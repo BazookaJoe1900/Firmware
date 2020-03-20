@@ -147,20 +147,20 @@ void FlightTasks::_updateCommand()
 
 	// switch to the commanded task
 	FlightTaskError switch_result = switchTask(desired_task);
-	uint8_t cmd_result = vehicle_command_ack_s::VEHICLE_RESULT_FAILED;
+	vehicle_command_ack_s::VEHICLE_CMD_RESULT cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED;
 
 	// if we are in/switched to the desired task
 	if (switch_result >= FlightTaskError::NoError) {
-		cmd_result = vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+		cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 		// if the task is running apply parameters to it and see if it rejects
 		if (isAnyTaskActive() && !_current_task.task->applyCommandParameters(command)) {
-			cmd_result = vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+			cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 
 			// if we just switched and parameters are not accepted, go to failsafe
 			if (switch_result >= FlightTaskError::NoError) {
 				switchTask(FlightTaskIndex::ManualPosition);
-				cmd_result = vehicle_command_ack_s::VEHICLE_RESULT_FAILED;
+				cmd_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED;
 			}
 		}
 	}
@@ -169,7 +169,7 @@ void FlightTasks::_updateCommand()
 	vehicle_command_ack_s command_ack{};
 	command_ack.timestamp = hrt_absolute_time();
 	command_ack.command = (uint16_t)command.command;
-	command_ack.result = (uint8_t)cmd_result;
+	command_ack.result = cmd_result;
 	command_ack.result_param1 = static_cast<int>(switch_result);
 	command_ack.target_system = command.source_system;
 	command_ack.target_component = command.source_component;

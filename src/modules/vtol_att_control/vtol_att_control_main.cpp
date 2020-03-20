@@ -156,7 +156,7 @@ VtolAttitudeControl::handle_command()
 			vehicle_command_ack_s command_ack{};
 			command_ack.timestamp = hrt_absolute_time();
 			command_ack.command = _vehicle_cmd.command;
-			command_ack.result = (uint8_t)vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+			command_ack.result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 			command_ack.target_system = _vehicle_cmd.source_system;
 			command_ack.target_component = _vehicle_cmd.source_component;
 

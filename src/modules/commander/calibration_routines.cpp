@@ -53,6 +53,7 @@
 #include <matrix/math.hpp>
 
 #include <uORB/topics/vehicle_command.h>
+#include <uORB/topics/vehicle_command_ack.h>
 #include <uORB/topics/sensor_combined.h>
 
 #include <drivers/drv_tone_alarm.h>
@@ -822,14 +823,14 @@ void calibrate_cancel_unsubscribe(int cmd_sub)
 }
 
 static void calibrate_answer_command(orb_advert_t *mavlink_log_pub, struct vehicle_command_s &cmd,
-				     vehicle_command_s::VEHICLE_CMD_RESULT result)
+				     vehicle_command_ack_s::VEHICLE_CMD_RESULT result)
 {
 	switch (result) {
-	case vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED:
+	case vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED:
 		tune_positive(true);
 		break;
 
-	case vehicle_command_s::VEHICLE_CMD_RESULT::DENIED:
+	case vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED:
 		mavlink_log_critical(mavlink_log_pub, "command denied during calibration: %u", (uint16_t)cmd.command);
 		tune_negative(true);
 		break;
@@ -859,12 +860,12 @@ bool calibrate_cancel_check(orb_advert_t *mavlink_log_pub, int cancel_sub)
 			    (int)cmd.param4 == 0 &&
 			    (int)cmd.param5 == 0 &&
 			    (int)cmd.param6 == 0) {
-				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
+				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED);
 				mavlink_log_critical(mavlink_log_pub, CAL_QGC_CANCELLED_MSG);
 				return true;
 
 			} else {
-				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_s::VEHICLE_CMD_RESULT::DENIED);
+				calibrate_answer_command(mavlink_log_pub, cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED);
 			}
 		}
 	}

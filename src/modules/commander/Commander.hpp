@@ -142,7 +142,7 @@ private:
 	bool handle_command(vehicle_status_s *status, const vehicle_command_s &cmd, actuator_armed_s *armed,
 			    uORB::PublicationQueued<vehicle_command_ack_s> &command_ack_pub);
 
-	vehicle_command_s::VEHICLE_CMD_RESULT handle_command_motor_test(const vehicle_command_s &cmd);
+	vehicle_command_ack_s::VEHICLE_CMD_RESULT handle_command_motor_test(const vehicle_command_s &cmd);
 
 	void mission_init();
 

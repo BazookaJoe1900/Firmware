@@ -116,13 +116,13 @@ void SendEvent::process_commands()
 	// TODO: what is this modules purpose?
 }
 
-void SendEvent::answer_command(const vehicle_command_s &cmd, vehicle_command_s::VEHICLE_CMD_RESULT result)
+void SendEvent::answer_command(const vehicle_command_s &cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT result)
 {
 	/* publish ACK */
 	vehicle_command_ack_s command_ack{};
 	command_ack.timestamp = hrt_absolute_time();
 	command_ack.command = (uint16_t)cmd.command;
-	command_ack.result = (uint8_t)result;
+	command_ack.result = result;
 	command_ack.target_system = cmd.source_system;
 	command_ack.target_component = cmd.source_component;
 

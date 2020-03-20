@@ -100,7 +100,8 @@ MavlinkReceiver::MavlinkReceiver(Mavlink *parent) :
 }
 
 void
-MavlinkReceiver::acknowledge(uint8_t sysid, uint8_t compid, uint16_t command, uint8_t result)
+MavlinkReceiver::acknowledge(uint8_t sysid, uint8_t compid, uint16_t command,
+			     vehicle_command_ack_s::VEHICLE_CMD_RESULT result)
 {
 	vehicle_command_ack_s command_ack{};
 
@@ -469,10 +470,10 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 {
 	bool target_ok = evaluate_target_ok(cmd_mavlink.command, cmd_mavlink.target_system, cmd_mavlink.target_component);
 	bool send_ack = true;
-	uint8_t result = vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+	vehicle_command_ack_s::VEHICLE_CMD_RESULT result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 	if (!target_ok) {
-		acknowledge(msg->sysid, msg->compid, cmd_mavlink.command, vehicle_command_ack_s::VEHICLE_RESULT_FAILED);
+		acknowledge(msg->sysid, msg->compid, cmd_mavlink.command, vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED);
 		return;
 	}
 
@@ -489,7 +490,7 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 	} else if (cmd_mavlink.command == MAV_CMD_SET_MESSAGE_INTERVAL) {
 		if (set_message_interval((int)roundf(cmd_mavlink.param1), cmd_mavlink.param2, cmd_mavlink.param3)) {
-			result = vehicle_command_ack_s::VEHICLE_RESULT_FAILED;
+			result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED;
 		}
 
 	} else if (cmd_mavlink.command == MAV_CMD_GET_MESSAGE_INTERVAL) {
@@ -518,7 +519,7 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 
 		// TODO: Handle the case where a message is requested which could be sent, but for which there is no stream.
 		if (!stream_found) {
-			result = vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+			result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 		}
 
 	} else {
@@ -536,7 +537,7 @@ void MavlinkReceiver::handle_message_command_both(mavlink_message_t *msg, const 
 			// on a radio link
 			if (_mavlink->get_data_rate() < 5000) {
 				send_ack = true;
-				result = vehicle_command_ack_s::VEHICLE_RESULT_DENIED;
+				result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::DENIED;
 				_mavlink->send_statustext_critical("Not enough bandwidth to enable log streaming");
 
 			} else {
@@ -574,7 +575,7 @@ MavlinkReceiver::handle_message_command_ack(mavlink_message_t *msg)
 	command_ack.timestamp = hrt_absolute_time();
 	command_ack.result_param2 = ack.result_param2;
 	command_ack.command = ack.command;
-	command_ack.result = ack.result;
+	command_ack.result = (vehicle_command_ack_s::VEHICLE_CMD_RESULT)ack.result;
 	command_ack.from_external = true;
 	command_ack.result_param1 = ack.progress;
 	command_ack.target_system = ack.target_system;

@@ -48,7 +48,6 @@
 #include <uORB/PublicationQueued.hpp>
 #include <uORB/topics/uORBTopics.hpp>
 #include <uORB/topics/parameter_update.h>
-#include <uORB/topics/vehicle_command_ack.h>
 #include <uORB/topics/battery_status.h>
 
 #include <drivers/drv_hrt.h>
@@ -1014,19 +1013,19 @@ void Logger::handle_vehicle_command_update()
 		if (command.command == vehicle_command_s::VEHICLE_CMD::LOGGING_START) {
 
 			if ((int)(command.param1 + 0.5f) != 0) {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::UNSUPPORTED);
+				ack_vehicle_command(&command, vehicle_command_ack_s::VEHICLE_CMD_RESULT::UNSUPPORTED);
 
 			} else if (can_start_mavlink_log()) {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
+				ack_vehicle_command(&command, vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED);
 				start_log_mavlink();
 
 			} else {
-				ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED);
+				ack_vehicle_command(&command, vehicle_command_ack_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED);
 			}
 
 		} else if (command.command == vehicle_command_s::VEHICLE_CMD::LOGGING_STOP) {
 			stop_log_mavlink();
-			ack_vehicle_command(&command, vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED);
+			ack_vehicle_command(&command, vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED);
 		}
 	}
 }
@@ -1932,12 +1931,12 @@ void Logger::write_changed_parameters(LogType type)
 	_writer.notify();
 }
 
-void Logger::ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_s::VEHICLE_CMD_RESULT result)
+void Logger::ack_vehicle_command(vehicle_command_s *cmd, vehicle_command_ack_s::VEHICLE_CMD_RESULT result)
 {
 	vehicle_command_ack_s vehicle_command_ack = {};
 	vehicle_command_ack.timestamp = hrt_absolute_time();
 	vehicle_command_ack.command = (uint16_t)cmd->command;
-	vehicle_command_ack.result = (uint8_t)result;
+	vehicle_command_ack.result = result;
 	vehicle_command_ack.target_system = cmd->source_system;
 	vehicle_command_ack.target_component = cmd->source_component;
 

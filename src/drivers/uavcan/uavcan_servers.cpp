@@ -476,7 +476,7 @@ UavcanServers::run(pthread_addr_t)
 			vehicle_command_s cmd{};
 			vcmd_sub.copy(&cmd);
 
-			uint8_t cmd_ack_result = vehicle_command_ack_s::VEHICLE_RESULT_ACCEPTED;
+			vehicle_command_ack_s::VEHICLE_CMD_RESULT cmd_ack_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::ACCEPTED;
 
 			if (cmd.command == vehicle_command_s::VEHICLE_CMD::PREFLIGHT_UAVCAN) {
 				int command_id = static_cast<int>(cmd.param1 + 0.5f);
@@ -501,7 +501,7 @@ UavcanServers::run(pthread_addr_t)
 						if (call_res < 0) {
 							PX4_ERR("UAVCAN ESC enumeration: couldn't send initial Begin request: %d", call_res);
 							beep(BeepFrequencyError);
-							cmd_ack_result = vehicle_command_ack_s::VEHICLE_RESULT_FAILED;
+							cmd_ack_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::FAILED;
 
 						} else {
 							beep(BeepFrequencyGenericIndication);
@@ -512,7 +512,7 @@ UavcanServers::run(pthread_addr_t)
 
 				default: {
 						PX4_ERR("UAVCAN command bridge: unknown command ID %d", command_id);
-						cmd_ack_result = vehicle_command_ack_s::VEHICLE_RESULT_UNSUPPORTED;
+						cmd_ack_result = vehicle_command_ack_s::VEHICLE_CMD_RESULT::UNSUPPORTED;
 						break;
 					}
 				}
@@ -554,7 +554,7 @@ UavcanServers::run(pthread_addr_t)
 			vehicle_command_ack_s ack{};
 			ack.timestamp = hrt_absolute_time();
 			ack.command = (uint16_t)cmd.command;
-			ack.result = (uint16_t)cmd_ack_result;
+			ack.result = cmd_ack_result;
 			ack.target_system = cmd.source_system;
 			ack.target_component = cmd.source_component;
 
