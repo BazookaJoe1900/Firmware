@@ -128,15 +128,6 @@ enum class VEHICLE_CMD : uint16_t {
 	CONTROL_HIGH_LATENCY = 2600,
 };
 
-enum class VEHICLE_CMD_RESULT : uint8_t {
-	ACCEPTED = 0,
-	TEMPORARILY_REJECTED = 1,
-	DENIED = 2,
-	UNSUPPORTED = 3,
-	FAILED = 4,
-	IN_PROGRESS = 5,
-};
-
 enum class VEHICLE_MOUNT_MODE : uint8_t {
 	RETRACT = 0,
 	NEUTRAL = 1,
