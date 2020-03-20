@@ -536,7 +536,7 @@ CameraTrigger::Run()
 
 			if (now - _last_trigger_timestamp < _min_interval * 1000) {
 				// triggering too fast, abort
-				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_TEMPORARILY_REJECTED;
+				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::TEMPORARILY_REJECTED;
 
 			} else {
 				if (commandParamToInt(cmd.param7) == 1) {
@@ -551,10 +551,10 @@ CameraTrigger::Run()
 
 				}
 
-				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT_ACCEPTED;
+				cmd_result = vehicle_command_s::VEHICLE_CMD_RESULT::ACCEPTED;
 			}
 
-		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD_DO_TRIGGER_CONTROL) {
+		} else if (cmd.command == vehicle_command_s::VEHICLE_CMD::DO_TRIGGER_CONTROL) {
 
 			need_ack = true;
 
